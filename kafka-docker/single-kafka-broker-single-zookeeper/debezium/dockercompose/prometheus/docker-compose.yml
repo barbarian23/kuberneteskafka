@@ -1,0 +1,21 @@
+version: '2'
+
+networks:
+  app-tier:
+    driver: bridge
+
+services:
+  prometheus:
+    image: bitnami/prometheus:latest
+    ports:
+      - "9090:9090/tcp"
+    volumes:
+      - "./prometheus.yml:/opt/bitnami/prometheus/conf/prometheus.yml"
+    networks:
+      - app-tier
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - app-tier

@@ -1,0 +1,38 @@
+version: '2'
+
+networks:
+  app-tier:
+    driver: bridge
+
+services:
+  zookeeper:
+    image: 'bitnami/zookeeper:latest'
+    environment:
+      - 'ALLOW_ANONYMOUS_LOGIN=yes'
+    networks:
+      - app-tier
+  kafka:
+    image: 'bitnami/kafka:latest'
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    ports:
+      - 29092:9092
+    networks:
+      - app-tier
+    depends_on:
+      - zookeeper
+  prometheus:
+    image: bitnami/prometheus:latest
+    ports:
+      - "9090:9090/tcp"
+    volumes:
+      - "./prometheus.yml:/opt/bitnami/prometheus/conf/prometheus.yml"
+    networks:
+      - app-tier
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - app-tier

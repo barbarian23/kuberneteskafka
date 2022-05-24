@@ -1,0 +1,511 @@
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="SwaggerIU" />
+  <title>Debezium test cases</title>
+  <style>
+    .body {
+      text-align: center;
+    }
+
+    .parent {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 90px;
+    }
+
+    .child {
+      width: 100%;
+      padding: 10px 10px;
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-start;
+      align-items: center;
+      border: 1px solid #49cc90;
+      border-radius: 4px;
+      margin: 0px 0px 15px;
+      background: #ECFAF4;
+      position: relative;
+    }
+
+    .button {
+      margin: 5px 10px;
+      font-weight: 700;
+      min-width: 80px;
+      padding: 5px 3px;
+      border: 1px solid black;
+      border-radius: 5px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+      font-family: sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .description {
+      color: #3b4151;
+      font-family: sans-serif;
+      font-size: 15px;
+      word-break: break-word;
+      margin-right: 20px;
+      min-width: 366px;
+      text-align: left;
+    }
+
+    .input {
+      color: #3b4151;
+      font-family: sans-serif;
+      font-size: 13px;
+      word-break: break-word;
+      margin-left: 10px;
+    }
+
+    .input-container {
+      margin-left: 10px;
+      min-width: 567px;
+      text-align: left;
+    }
+
+    .button-container {
+      margin-left: 10px;
+    }
+
+    .parent a {
+      text-decoration: none !important;
+    }
+
+    .query {
+      background: #49cc90;
+      cursor: grab;
+    }
+
+    .query:active {
+      transform: scale(0.9);
+    }
+
+    .case {
+      background: #fca130;
+    }
+
+    .input-container-line {
+      margin: 0px 0px 15px 0px;
+    }
+
+    .button-container-line {
+      margin: 0px 0px 15px 0px;
+    }
+
+    .delete {
+      background: #f93e3e;
+    }
+  </style>
+</head>
+<script>
+  function runQueryLocal(sql) {
+    fetch(`http://localhost:3000/queryLocal?query=${sql}`)
+      .then(response => response.json())
+      .then(data => console.log(data));
+  }
+
+  
+  function runLoadTest(numbers, name, age){
+    console.log("run load test",numbers, name, age)
+    fetch(`http://localhost:3000/loadTest?numbers=${numbers}&name=${name}&age=${age}`)
+    .then(response => response.json())
+  }
+
+  function runTransactionLocal(sqls) {
+    fetch(`http://localhost:3000/transactionLocal?query=${sqls}`)
+      .then(response => response.json())
+      .then(data => console.log(data));
+  }
+
+  function runQueryRemote(sql) {
+    fetch(`http://localhost:3000/queryRemote?query=${sql}`)
+      .then(response => response.json())
+      .then(data => console.log(data));
+  }
+
+  function runTransactionRemote(sqls) {
+    fetch(`http://localhost:3000/transactionRemote?query=${sqls}`)
+      .then(response => response.json())
+      .then(data => console.log(data));
+  }
+
+
+  function sync(target, source) {
+    document.getElementById(source).value = document.getElementById(target).value;
+  }
+
+</script>
+
+<body>
+  <div class="body">
+    <h1>Debezium Test case</h1>
+    <div class="parent">
+      <div class="child">
+        <div class="button case">Case 1</div>
+        <div class="description">Add one record in [Source] table successfully:</div>
+        <div class="input-container">
+          <input type="number" id="c1id" class="input" placeholder="Input ID">
+          <input type="text" id="c1name" class="input" placeholder="Input Name">
+          <input type="number" id="c1age" class="input" placeholder="Input Age">
+        </div>
+        <div class="button-container">
+          <div class="button query"
+            onclick="runQueryLocal('insert into debeziumdb.user values('+document.getElementById('c1id').value+',\''+document.getElementById('c1name').value+'\','+document.getElementById('c1age').value+')');">
+            Add to Source DB</div>
+        </div>
+      </div>
+
+      <div class="child">
+        <div class="button case">Case 2</div>
+        <div class="description">Update one record in [Source] table successfully: </div>
+        <div class="input-container">
+          <input type="number" id="c2id" class="input" placeholder="Input ID">
+          <input type="text" id="c2name" class="input" placeholder="Input Name">
+        </div>
+        <div class="button-container">
+          <div class="button query"
+            onclick="runQueryLocal('UPDATE `debeziumdb`.`user` SET `name` = \''+document.getElementById('c2name').value+'\' WHERE (`id` = '+document.getElementById('c2id').value+');');">
+            Update to Source DB</div>
+        </div>
+      </div>
+
+      <div class="child">
+        <div class="button case">Case 3</div>
+        <div class="description">Delete one record in [Source] table successfully: </div>
+        <div class="input-container">
+          <input type="number" id="c3id" class="input" placeholder="Input ID">
+        </div>
+        <div class="button-container">
+          <div class="button query"
+            onclick="runQueryLocal('DELETE FROM `debeziumdb`.`user` WHERE (`id` = '+document.getElementById('c3id').value+');');">
+            Delete to Source DB</div>
+        </div>
+      </div>
+
+      <div class="child">
+        <div class="button case">Case 4</div>
+        <div class="description">Add multiple record in [Source] table successfully: </div>
+        <div class="input-container">
+          <div class="input-container-line">
+            <input type="number" id="c41id" class="input" placeholder="Input ID">
+            <input type="text" id="c41name" class="input" placeholder="Input Name">
+            <input type="number" id="c41age" class="input" placeholder="Input Age">
+          </div>
+          <div class="input-container-line">
+            <input type="number" id="c42id" class="input" placeholder="Input ID">
+            <input type="text" id="c42name" class="input" placeholder="Input Name">
+            <input type="number" id="c42age" class="input" placeholder="Input Age">
+          </div>
+          <div class="input-container-line">
+            <input type="number" id="c43id" class="input" placeholder="Input ID">
+            <input type="text" id="c43name" class="input" placeholder="Input Name">
+            <input type="number" id="c43age" class="input" placeholder="Input Age">
+          </div>
+          <div class="input-container-line">
+            <input type="number" id="c44id" class="input" placeholder="Input ID">
+            <input type="text" id="c44name" class="input" placeholder="Input Name">
+            <input type="number" id="c44age" class="input" placeholder="Input Age">
+          </div>
+          <div class="input-container-line">
+            <input type="number" id="c45id" class="input" placeholder="Input ID">
+            <input type="text" id="c45name" class="input" placeholder="Input Name">
+            <input type="number" id="c45age" class="input" placeholder="Input Age">
+          </div>
+        </div>
+        <div class="button-container">
+          <div class="button query"
+            onclick="runQueryLocal('insert into debeziumdb.user values('+document.getElementById('c41id').value+',\''+document.getElementById('c41name').value+'\','+document.getElementById('c41age').value+')'); runQueryLocal('insert into debeziumdb.user values('+document.getElementById('c42id').value+',\''+document.getElementById('c42name').value+'\','+document.getElementById('c42age').value+')'); runQueryLocal('insert into debeziumdb.user values('+document.getElementById('c43id').value+',\''+document.getElementById('c43name').value+'\','+document.getElementById('c43age').value+')'); runQueryLocal('insert into debeziumdb.user values('+document.getElementById('c44id').value+',\''+document.getElementById('c44name').value+'\','+document.getElementById('c44age').value+')'); runQueryLocal('insert into debeziumdb.user values('+document.getElementById('c45id').value+',\''+document.getElementById('c45name').value+'\','+document.getElementById('c45age').value+')');">
+            Add to Source DB</div>
+        </div>
+      </div>
+
+      <div class="child">
+        <div class="button case">Case 5</div>
+        <div class="description">Update multiple records in [Source] table successfully: </div>
+        <div class="input-container">
+          <input type="number" id="c51id" class="input" placeholder="Update ID Greater than">
+          <input type="text" id="c51name" class="input" placeholder="Input Name">
+        </div>
+        <div class="button-container">
+          <div class="button query"
+            onclick="runQueryLocal('UPDATE `debeziumdb`.`user` SET `name` = \''+document.getElementById('c51name').value+'\' WHERE (`id` > '+document.getElementById('c51id').value+');');">
+            Update to Source DB</div>
+        </div>
+      </div>
+
+      <div class="child">
+        <div class="button case">Case 6</div>
+        <div class="description">Delete multiple records in [Source] table successfully: </div>
+        <div class="input-container">
+          <input type="number" id="c61id" class="input" placeholder="Input ID Greater than">
+        </div>
+        <div class="button-container">
+          <div class="button query"
+            onclick="runQueryLocal('delete from debeziumdb.user where id > '+document.getElementById('c61id').value+';')">
+            Delete to Source DB</div>
+        </div>
+      </div>
+
+      <div class="child">
+        <div class="button case">Case 7</div>
+        <div class="description">Run Transaction to add multiple record in [Source] table successfully: </div>
+        <div class="input-container">
+          <div class="input-container-line">
+            <input type="number" id="c71id" class="input" placeholder="Input ID">
+            <input type="text" id="c71name" class="input" placeholder="Input Name">
+            <input type="number" id="c71age" class="input" placeholder="Input Age">
+          </div>
+          <div class="input-container-line">
+            <input type="number" id="c72id" class="input" placeholder="Input ID">
+            <input type="text" id="c72name" class="input" placeholder="Input Name">
+            <input type="number" id="c72age" class="input" placeholder="Input Age">
+          </div>
+          <div class="input-container-line">
+            <input type="number" id="c73id" class="input" placeholder="Input ID">
+            <input type="text" id="c73name" class="input" placeholder="Input Name">
+            <input type="number" id="c73age" class="input" placeholder="Input Age">
+          </div>
+          <div class="input-container-line">
+            <input type="number" id="c74id" class="input" placeholder="Input ID">
+            <input type="text" id="c74name" class="input" placeholder="Input Name">
+            <input type="number" id="c74age" class="input" placeholder="Input Age">
+          </div>
+          <div class="input-container-line">
+            <input type="number" id="c75id" class="input" placeholder="Input ID">
+            <input type="text" id="c75name" class="input" placeholder="Input Name">
+            <input type="number" id="c75age" class="input" placeholder="Input Age">
+          </div>
+        </div>
+        <div class="button-container">
+          <div class="button query" onclick="runTransactionLocal(
+            'insert into debeziumdb.user values('+document.getElementById('c71id').value+',\''+document.getElementById('c71name').value+'\','+document.getElementById('c71age').value+'),'+
+            '('+document.getElementById('c72id').value+',\''+document.getElementById('c72name').value+'\','+document.getElementById('c72age').value+'),'+
+            '('+document.getElementById('c73id').value+',\''+document.getElementById('c73name').value+'\','+document.getElementById('c73age').value+'),'+
+            '('+document.getElementById('c74id').value+',\''+document.getElementById('c74name').value+'\','+document.getElementById('c74age').value+'),'+
+            '('+document.getElementById('c75id').value+',\''+document.getElementById('c75name').value+'\','+document.getElementById('c75age').value+');'
+          )">
+            Run transaction</div>
+        </div>
+      </div>
+
+      <div class="child">
+        <div class="button case">Case 8</div>
+        <div class="description">Update multiple records in [Source] table by open transaction and then roll it back:
+        </div>
+        <div class="input-container">
+          <input type="number" id="c81id" class="input" placeholder="Input ID Greater than">
+          <input type="text" id="c81name" class="input" placeholder="Input Name">
+        </div>
+        <div class="button-container">
+          <div class="button query"
+            onclick="runTransactionLocal('UPDATE `debeziumdb`.`user` set name = \''+ document.getElementById('c81name').value +'\' where id > '+document.getElementById('c81id').value+'')">
+            Run transaction</div>
+        </div>
+      </div>
+
+      <div class="child">
+        <div class="button case">Case 9</div>
+        <div class="description">Delete multiple records in [Source] table by open transaction and then roll it back:
+        </div>
+        <div class="input-container">
+          <input type="number" id="c91id" class="input" placeholder="Input ID Greater than">
+        </div>
+        <div class="button-container">
+          <div class="button query"
+            onclick="runTransactionLocal('delete from debeziumdb.user where id > '+document.getElementById('c91id').value+'')">
+            Run transaction</div>
+        </div>
+      </div>
+    </div>
+
+    <h1>Debezium Exeptional cases</h1>
+
+
+    <div class="child">
+      <div class="button case">Case 1</div>
+      <div class="description">
+        <p>The [Target] DB is offline</p>
+        <p>add record in [Source] Table</p>
+        <p>Online the [Target] DB after a certain period</p>
+        <p>Check any activities during the offline period can be resync to [Target] DB</p>
+      </div>
+      <div class="input-container">
+        <input type="number" id="e1id" class="input" placeholder="Input ID">
+        <input type="text" id="e1name" class="input" placeholder="Input Name">
+        <input type="number" id="e1age" class="input" placeholder="Input Age">
+      </div>
+      <div class="button-container">
+        <div class="button query"
+          onclick="runQueryLocal('insert into debeziumdb.user values('+document.getElementById('e1id').value+',\''+document.getElementById('e1name').value+'\','+document.getElementById('e1age').value+')');">
+          Add to Source DB</div>
+      </div>
+    </div>
+
+    <div class="child">
+      <div class="button case">Case 2</div>
+      <div class="description">
+        <p>Remove a record in [Target] Table directly</p>
+        <p>Update the corresponding record in [Source] Table</p>
+        <p>Check what happen to [Target] Table</p>
+      </div>
+      <div class="input-container">
+        <div class="input-container-line">
+          <input type="number" id="e21id" class="input" placeholder="Remove ID" oninput="sync('e21id','e22id')">
+        </div>
+        <div class="input-container-line">
+          <input type="number" id="e22id" class="input" placeholder="Input ID" readonly>
+          <input type="text" id="e22name" class="input" placeholder="Input Name">
+        </div>
+      </div>
+      <div class="button-container">
+        <div class="button-container-line">
+          <div class="button query"
+            onclick="runQueryRemote('delete from debeziumdb.user where id = '+document.getElementById('e21id').value+'')">
+            Delete to Target DB</div>
+        </div>
+        <div class="button-container-line">
+          <div class="button query"
+            onclick="runQueryLocal('UPDATE `debeziumdb`.`user` SET `name` = \''+document.getElementById('e22name').value+'\' WHERE (`id` = '+document.getElementById('e22id').value+');');">
+            Update to Source DB</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="child">
+      <div class="button case">Case 3</div>
+      <div class="description">
+        <p>Update a record in [Target] Table directly</p>
+        <p>Update the corresponding record in [Source] Table</p>
+        <p>Check what happen to [Target] Table to see if the data in [Target] table overwritten by [Source] Table</p>
+      </div>
+      <div class="input-container">
+        <div class="input-container-line">
+          <input type="number" id="e31id" class="input" placeholder="Input ID" oninput="sync('e31id','e32id')">
+          <input type="text" id="e31name" class="input" placeholder="Input Name" oninput="sync('e31name','e32name')">
+        </div>
+        <div class="input-container-line">
+          <input type="number" id="e32id" class="input" placeholder="Input ID" readonly>
+          <input type="text" id="e32name" class="input" placeholder="Input Name" >
+        </div>
+      </div>
+      <div class="button-container">
+        <div class="button-container-line">
+          <div class="button query"
+            onclick="runQueryRemote('UPDATE `debeziumdb`.`user` SET `name` = \''+document.getElementById('e31name').value+'\' WHERE (`id` = '+document.getElementById('e31id').value+');');">
+            Update to Target DB</div>
+        </div>
+        <div class="button-container-line">
+          <div class="button query"
+            onclick="runQueryLocal('UPDATE `debeziumdb`.`user` SET `name` = \''+document.getElementById('e32name').value+'\' WHERE (`id` = '+document.getElementById('e32id').value+');');">
+            Update to Source DB</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="child">
+      <div class="button case">Case 4</div>
+      <div class="description">
+        <p>Add a record in [Target] Table directly</p>
+        <p>Add the corresponding record in [Source] Table with same key but different content</p>
+        <p>Check what happen to [Target] Table to see if the data in [Target] table overwritten by [Source] Table</p>
+      </div>
+      <div class="input-container">
+        <div class="input-container-line">
+          <input type="number" id="e41id" class="input" placeholder="Input ID" oninput="sync('e41id','e42id')">
+          <input type="text" id="e41name" class="input" placeholder="Input Name"">
+          <input type=" number" id="e41age" class="input" placeholder="Input Age">
+        </div>
+        <div class="input-container-line">
+          <input type="number" id="e42id" class="input" placeholder="Input ID" readonly>
+          <input type="text" id="e42name" class="input" placeholder="Input Name">
+          <input type="number" id="e42age" class="input" placeholder="Input Age">
+        </div>
+      </div>
+      <div class="button-container">
+        <div class="button-container-line">
+          <div class="button query"
+            onclick="runQueryRemote('insert into debeziumdb.user values('+document.getElementById('e41id').value+',\''+document.getElementById('e41name').value+'\','+document.getElementById('e41age').value+',\'false\');');">
+            Add to Target DB</div>
+        </div>
+        <div class="button-container-line">
+          <div class="button query"
+            onclick="runQueryLocal('insert into debeziumdb.user values('+document.getElementById('e42id').value+',\''+document.getElementById('e42name').value+'\','+document.getElementById('e42age').value+');');">
+            Add to Source DB</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="child">
+      <div class="button case">Case 5</div>
+      <div class="description">
+        <p>Shutdown the kafka server</p>
+        <p>Make some changes in [Source] Table </p>
+        <p>Switch on the kafka server</p>
+        <p>Check what happen to [Target] Table</p>
+      </div>
+      <div class="input-container">
+        <input type="number" id="e51id" class="input" placeholder="Input ID">
+        <input type="text" id="e51name" class="input" placeholder="Input Name">
+        <input type="number" id="e51age" class="input" placeholder="Input Age">
+      </div>
+      <div class="button-container">
+        <div class="button query"
+          onclick="runQueryLocal('insert into debeziumdb.user values('+document.getElementById('e51id').value+',\''+document.getElementById('e51name').value+'\','+document.getElementById('e51age').value+');');">
+          Add to Source DB</div>
+      </div>
+    </div>
+
+    <div class="child">
+      <div class="button case">Case 6</div>
+      <div class="description">
+        <p>Shutdown the connectorr</p>
+        <p>Make some changes in [Source] Table </p>
+        <p>Switch on the connectorr</p>
+        <p>Check what happen to [Target] Table</p>
+      </div>
+      <div class="input-container">
+        <input type="number" id="e61id" class="input" placeholder="Input ID">
+        <input type="text" id="e61name" class="input" placeholder="Input Name">
+        <input type="number" id="e61age" class="input" placeholder="Input Age">
+      </div>
+      <div class="button-container">
+        <div class="button query"
+          onclick="runQueryLocal('insert into debeziumdb.user values('+document.getElementById('e61id').value+',\''+document.getElementById('e61name').value+'\','+document.getElementById('e61age').value+');');">
+          Add to Source DB</div>
+      </div>
+    </div>
+
+    <h1>Debezium Load Test</h1>
+
+    <div class="child">
+      <div class="description">
+        <p>Simultaneously add a number of records to the database</p>
+      </div>
+      <div class="input-container">
+        <input type="number" id="debloadtestnum" class="input" placeholder="Enter the number of records">
+        <input type="text" id="debloadtestname" class="input" placeholder="Input Name">
+        <input type="number" id="debloadtestage" class="input" placeholder="Input Age">
+      </div>
+      <div class="button-container">
+        <!-- <div class="button query"
+          onclick="runQueryLocal('insert into debeziumdb.user values('+document.getElementById('e61id').value+',\''+document.getElementById('e61name').value+'\','+document.getElementById('e61age').value+');');"> -->
+        <div class="button query"
+        onclick="runLoadTest(document.getElementById('debloadtestnum').value,document.getElementById('debloadtestname').value,document.getElementById('debloadtestage').value);">
+          Add a number of records to Source DB</div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

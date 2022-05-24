@@ -1,0 +1,48 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: debezium-connector-jdbc-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: debezium-connector-jdbc-es
+  template:
+    metadata:
+      labels:
+        app: debezium-connector-jdbc-es
+        id: "0"
+    spec:
+      containers:
+      - name: debezium-connector-jdbc-es
+        image: debeziumdev.azurecr.io/debezium-connect-cluster:latest
+        ports:
+          - containerPort: 8083
+        env:
+          - name: BOOTSTRAP_SERVERS
+            value: "debeziumdev-kafka-bootstrap:9092"
+          - name: GROUP_ID
+            value: "2"
+          - name: CONFIG_STORAGE_TOPIC
+            value: "my_connect_configs"
+          - name: OFFSET_STORAGE_TOPIC
+            value: "my_connect_offsets"
+          - name: STATUS_STORAGE_TOPIC
+            value: "my_source_connect_statuses"
+      imagePullSecrets: 
+        -   name: debeziumconnectsecret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: debezium-connector-jdbc-es
+  name: connector-service
+spec:
+  ports:
+  - port: 8083
+    name: connector-port
+    protocol: TCP
+  selector:
+    app: debezium-connector-jdbc-es
+  type: LoadBalancer

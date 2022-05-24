@@ -1,0 +1,157 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: debezium-connect-jdbc
+spec:
+  containers:
+    - name: debezium-connect-jdbc
+      image: debezium-connect-jdbc
+      ports:
+        - containerPort: 8083
+      imagePullPolicy: Never
+      env:
+        - name: CONFIG_STORAGE_TOPIC
+          value: "my_connect_configs"
+        - name: OFFSET_STORAGE_TOPIC
+          value: "my_connect_offsets"
+        - name: STATUS_STORAGE_TOPIC
+          value: "my_source_connect_statuses"
+		  
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: connector
+spec:
+  selector:
+    matchLabels:
+      app: connector
+  template:
+    metadata:
+      labels:
+        app: connector
+    spec:
+      containers:
+        - name: debezium-connector-jdbc
+          image: debezium-connector-jdbc
+          imagePullPolicy: Never
+          env:
+            - name: CONFIG_STORAGE_TOPIC
+              value: "my_connect_configs"
+            - name: OFFSET_STORAGE_TOPIC
+              value: "my_connect_offsets"
+            - name: STATUS_STORAGE_TOPIC
+              value: "my_source_connect_statuses"
+          ports:
+            - containerPort: 8083
+		
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: zookeeper-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zookeeper
+  template:
+    metadata:
+      labels:
+        app: zookeeper
+    spec:
+      containers:
+      - name: zookeeper
+        image: debezium/zookeeper:latest
+        ports:
+        - containerPort: 2181
+        env:
+        - name: ZOO_MY_ID
+          value: "1"
+        - name: ZOO_SERVERS
+          value: zoo
+	
+apiVersion: v1
+kind: Service
+metadata:
+  name: zookeeper-ip-service
+spec:
+  type: ClusterIP 
+  selector:
+    component: zookeeper
+  ports:
+  - name: zookeeper
+    port: 2181
+    targetPort: 2181
+	
+	
+apiVersion: v1
+kind: Pod
+metadata:
+  name: debezium-connector-jdbc-es
+spec:
+  containers:
+    - name: debezium-connector-jdbc-es
+      image: debezium-connector-jdbc-es
+      ports:
+        - containerPort: 8083
+      imagePullPolicy: Never
+      env:
+        - name: BOOTSTRAP_SERVERS
+          value: "kafka:9092"
+        - name: GROUP_ID
+          value: "1"
+        - name: CONFIG_STORAGE_TOPIC
+          value: "my_connect_configs"
+        - name: OFFSET_STORAGE_TOPIC
+          value: "my_connect_offsets"
+        - name: STATUS_STORAGE_TOPIC
+          value: "my_source_connect_statuses"
+		  
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: debezium-connector-jdbc-es
+  name: debezium-connector-jdbc-es
+spec:
+  ports:
+  - name: connector-port
+    port: 8083
+    targetPort: 8083
+  selector:
+    app: debezium-connector-jdbc-es
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: debezium-connector-jdbc-es
+  name: debezium-connector-jdbc-es
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: debezium-connector-jdbc-es
+  template:
+    metadata:
+      labels:
+        app: debezium-connector-jdbc-es
+    spec:
+      containers:
+        - image: debezium-connector-jdbc-es:latest
+          imagePullPolicy: Never
+          name: debezium-connector-jdbc-es
+          ports:
+          - containerPort: 8083
+          env:
+            - name: BOOTSTRAP_SERVERS
+              value: "kafka:9092"
+            - name: GROUP_ID
+              value: "1"
+            - name: CONFIG_STORAGE_TOPIC
+              value: "my_connect_configs"
+            - name: OFFSET_STORAGE_TOPIC
+              value: "my_connect_offsets"
+            - name: STATUS_STORAGE_TOPIC
+              value: "my_source_connect_statuses"

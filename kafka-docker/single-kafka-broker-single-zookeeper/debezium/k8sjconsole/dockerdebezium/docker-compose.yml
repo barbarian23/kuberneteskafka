@@ -1,0 +1,55 @@
+version: '2'
+services:
+  zookeeper:
+    image: quay.io/debezium/zookeeper:1.9
+    ports:
+     - 2181:2181
+     - 2888:2888
+     - 3888:3888
+  kafka:
+    image: quay.io/debezium/kafka:1.9
+    ports:
+     - 9092:9092
+    links:
+     - zookeeper
+    environment:
+     - ZOOKEEPER_CONNECT=zookeeper:2181
+  connect:
+    build:
+      context: jmx-exporter
+      args:
+        JMX_AGENT_VERSION: 0.15.0
+    ports:
+     - 8083:8083
+     - 2976:2976
+    links:
+     - kafka
+    environment:
+     - BOOTSTRAP_SERVERS=kafka:9092
+     - GROUP_ID=1
+     - CONFIG_STORAGE_TOPIC=my_connect_configs
+     - OFFSET_STORAGE_TOPIC=my_connect_offsets
+     - STATUS_STORAGE_TOPIC=my_connect_statuses
+     - KAFKA_OPTS=-javaagent:/kafka/etc/jmx_prometheus_javaagent.jar=8080:/kafka/etc/config.yml
+     - JMXHOST=localhost
+     - JMXPORT=2976
+  prometheus:
+    build:
+      context: prometheus 
+      args:
+        PROMETHEUS_VERSION: v2.26.0
+    ports:
+     - 9090:9090
+    links:
+     - connect
+  grafana:
+    build:
+      context: grafana 
+      args:
+        GRAFANA_VERSION: 7.5.5
+    ports:
+     - 3000:3000
+    links:
+     - prometheus
+    environment:
+     - DS_PROMETHEUS=prometheus

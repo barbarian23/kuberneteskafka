@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: debezium-connector-jdbc-es
+  labels:
+    app: debezium-connector-jdbc-es
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: index
+  template:
+    metadata:
+      labels:
+        app: index
+    spec:
+      containers:
+      - name: debezium-connector-jdbc-es
+        image: debezium-connector-jdbc-es:latest
+        imagePullPolicy: Never
+        ports:
+          - containerPort: 8083
+        env:
+          - name: BOOTSTRAP_SERVERS
+            value: "kafka-service:30092"
+          - name: GROUP_ID
+            value: "2"
+          - name: CONFIG_STORAGE_TOPIC
+            value: "my_connect_configs"
+          - name: OFFSET_STORAGE_TOPIC
+            value: "my_connect_offsets"
+          - name: STATUS_STORAGE_TOPIC
+            value: "my_source_connect_statuses"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: debezium-connector-jdbc-es
+  name: debezium-connector-jdbc-es
+spec:
+  selector:
+    app: kafka   
+  type: LoadBalancer
+  ports:
+  - protocol: TCP
+    port: 7083
+    targetPort: 8083
+    nodePort: 30083

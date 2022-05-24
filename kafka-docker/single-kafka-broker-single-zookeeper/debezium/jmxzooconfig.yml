@@ -1,0 +1,5 @@
+startDelaySeconds: 0
+lowercaseOutputName: false
+lowercaseOutputLabelNames: false
+ssl: false
+jmxUrl: service:jmx:rmi://localhost:9010/jndi/rmi://localhost:9010/jmxrmi

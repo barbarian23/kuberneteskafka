@@ -1,0 +1,69 @@
+version: '3.2'
+
+services:
+  zookeeper:
+    container_name: zookeeper
+    image: wurstmeister/zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+
+
+      KAFKA_JMX_OPTS: >-
+        -Dcom.sun.management.jmxremote=true	
+        -Dcom.sun.management.jmxremote.authenticate=false 	
+        -Dcom.sun.management.jmxremote.ssl=false 
+        -Djava.rmi.server.hostname=localhost
+        -Dcom.sun.management.jmxremote.port=11992
+        -Dcom.sun.management.jmxremote.rmi.port=11992
+
+      JMX_PORT: 11992
+    ports:
+    - "2181:2181"
+    - "11992:11992"
+
+  kafka:
+    container_name: kafka
+    image: wurstmeister/kafka:latest
+    environment:
+      ## the >- used below infers a value which is a string and properly 
+      ## ignore the multiple lines resulting in one long string: 
+      ## https://yaml.org/spec/1.2/spec.html
+      KAFKA_LOG_RETENTION_MS: 10000
+      KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: 5000
+      KAFKA_ADVERTISED_LISTENERS: >- 
+        LISTENER_DOCKER_INTERNAL://kafka:19092, 
+        LISTENER_DOCKER_EXTERNAL://localhost:9092
+      JMX_PORT: 11991
+      KAFKA_JMX_OPTS:   >-
+                -Djava.rmi.server.hostname=localhost
+                -Dcom.sun.management.jmxremote.port=11991
+                -Dcom.sun.management.jmxremote.rmi.port=11991
+                -Dcom.sun.management.jmxremote=true
+                -Dcom.sun.management.jmxremote.authenticate=false
+                -Dcom.sun.management.jmxremote.ssl=false
+
+      KAFKA_LISTENERS: >-
+        LISTENER_DOCKER_INTERNAL://kafka:19091,
+        LISTENER_DOCKER_EXTERNAL://localhost:9092
+      # KAFKA_LISTENERS:  LISTENER_DOCKER_EXTERNAL://localhost:9092
+
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: >- 
+        LISTENER_DOCKER_INTERNAL:PLAINTEXT,
+        LISTENER_DOCKER_EXTERNAL:PLAINTEXT
+
+      KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_DOCKER_INTERNAL
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_LOG4J_LOGGERS: >- 
+        kafka.controller=INFO,
+        kafka.producer.async.DefaultEventHandler=INFO,
+        state.change.logger=INFO
+
+    ports:
+    - 9092:9092
+    - 11991:11991
+   
+    depends_on:
+    - zookeeper
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
