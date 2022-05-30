@@ -1,24 +1,14 @@
-# apiVersion: v1
-# kind: Service
-# metadata:
-#   name: mysql
-# spec:
-#   ports:
-#   - port: 3306
-#   selector:
-#     app: mysql
-#   clusterIP: None
-# ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: mysql
+  labels:
+    app: mysql-service-open
+  name: mysql-service
 spec:
   ports:
   - port: 3306
     targetPort: 3306
     name: mysql-port
-    protocol: TCP
   selector:
     app: mysql
   type: LoadBalancer
@@ -39,15 +29,19 @@ spec:
         app: mysql
     spec:
       containers:
-      - image: quay.io/debezium/example-mysql:1.8
+      - image: mysql:5.6
         name: mysql
         env:
+          # Use secret in real usage
         - name: MYSQL_ROOT_PASSWORD
-          value: debezium
-        - name: MYSQL_USER
-          value: kelvin
-        - name: MYSQL_PASSWORD
-          value: root
+          value: $b%,&T:*=GW6W$+V
         ports:
         - containerPort: 3306
           name: mysql
+        volumeMounts:
+        - name: mysql-persistent-storage
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-persistent-storage
+        persistentVolumeClaim:
+          claimName: mysql-pv-claim

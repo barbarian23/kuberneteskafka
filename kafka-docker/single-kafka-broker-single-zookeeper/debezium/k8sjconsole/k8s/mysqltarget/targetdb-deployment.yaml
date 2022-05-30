@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: mysqltarget-service-open
+  name: mysqltarget-service
+spec:
+  ports:
+  - port: 3306
+    targetPort: 3306
+    name: mysqltarget-port
+  selector:
+    app: mysqltarget
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysqltarget
+spec:
+  selector:
+    matchLabels:
+      app: mysqltarget
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mysqltarget
+    spec:
+      containers:
+      - image: mysql:5.6
+        name: mysqltarget
+        env:
+          # Use secret in real usage
+        - name: MYSQL_ROOT_PASSWORD
+          value: ^r7Hj>X=Bkx9.9BU
+        ports:
+        - containerPort: 3306
+          name: mysqltarget
+        volumeMounts:
+        - name: mysqltarget-persistent-storage
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysqltarget-persistent-storage
+        persistentVolumeClaim:
+          claimName: mysqltarget-pv-claim

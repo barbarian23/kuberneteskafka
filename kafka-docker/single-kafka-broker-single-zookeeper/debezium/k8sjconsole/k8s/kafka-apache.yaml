@@ -1,7 +1,7 @@
 apiVersion: kafka.strimzi.io/v1beta2
 kind: Kafka
 metadata:
-  name: emo-dev-cluster
+  name: dev-cluster
 spec:
   kafka:
     version: 3.1.0
