@@ -1,0 +1,31 @@
+<input type="hidden" id="topic" value="<%= topic %>">
+<script src="https://cdn.socket.io/4.5.0/socket.io.min.js"
+        integrity="sha384-7EyYLQZgWBi67fBtVxw60/OWl1kjsfrPFcaU0pp0nAh+i8FD068QogUvg85Ewy1k" crossorigin="anonymous">
+</script>
+<script>
+        // let source = new EventSource("http://localhost:3223/subcribeATopic?topic=" + document.getElementById(
+        //         "topic").value);
+        // source.addEventListener("message", function (event) {
+        //         event.data = event.data.replace(/"/gm, "");
+        //         console.log(event.data);
+        //         document.write("<p>" + event.data + "</p>");
+        // }, false);
+        var zoom = new Date().getTime();
+
+        var socket = io();
+        var REQUEST_TOPIC_STREAM = "REQUEST_TOPIC_STREAM";
+        var SEND_TOPIC_STREAM = "SEND_TOPIC_STREAM";
+
+        socket.emit("create", {zoom: zoom});
+
+        socket.emit(REQUEST_TOPIC_STREAM, {
+                zoom: zoom,
+                topic: document.getElementById("topic").value
+        });
+
+        socket.on(SEND_TOPIC_STREAM, function (msg) {
+                var pre = document.createElement("pre");
+                pre.innerHTML = msg.msg;
+                document.body.appendChild(pre);
+        });
+</script>

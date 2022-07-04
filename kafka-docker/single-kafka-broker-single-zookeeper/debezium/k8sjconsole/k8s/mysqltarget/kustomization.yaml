@@ -1,0 +1,10 @@
+resources:
+  - target-storageclass.yaml
+  - target-pvc.yaml
+  - targetdb-deployment.yaml
+generatorOptions:
+  disableNameSuffixHash: true
+secretGenerator:
+  - name: mysql-credentials
+    literals:
+      - MYSQL_ROOT_PASSWORD=c291cmNlZGJzZWNyZXQ=

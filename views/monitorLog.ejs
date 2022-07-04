@@ -1,0 +1,32 @@
+<input type="hidden" id="file" value="<%= file %>">
+<script src="https://cdn.socket.io/4.5.0/socket.io.min.js"
+    integrity="sha384-7EyYLQZgWBi67fBtVxw60/OWl1kjsfrPFcaU0pp0nAh+i8FD068QogUvg85Ewy1k" crossorigin="anonymous">
+</script>
+<script>
+    // let source = new EventSource("http://localhost:3223/subcribeLog?file=" + document.getElementById("file")
+    // .value);
+    // source.addEventListener("message", function (event) {
+    //     console.log(event.data);
+    //     let pre = document.createElement("pre");
+    //     pre.innerHTML = event.data;
+    //     document.body.appendChild(pre);
+    // }, false);
+
+    var socket = io();
+    var REQUEST_LOG_STREAM = "REQUEST_LOG_STREAM";
+    var SEND_LOG_STREAM = "SEND_LOG_STREAM";
+    var zoom = new Date().getTime();
+
+    socket.emit("create", {zoom: zoom});
+
+    socket.emit(REQUEST_LOG_STREAM, {
+        zoom: zoom,
+        file: document.getElementById("file").value
+    });
+
+    socket.on(SEND_LOG_STREAM, function (msg) {
+        var pre = document.createElement("pre");
+        pre.innerHTML = msg.msg;
+        document.body.appendChild(pre);
+    });
+</script>

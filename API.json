@@ -1,0 +1,200 @@
+{
+    "swagger": "2.0",
+    "info": {
+      "description": "API for monitor Debezium",
+      "version": "1.0.0",
+      "title": "Monitor Debezium"
+    },
+    "host": "20.239.121.102:3223",
+    "basePath": "/",
+    "schemes": [
+      "http"
+    ],
+    "paths": {
+      "/list": {
+        "get": {
+          "summary": "Finds list log in folder",
+          "description": "Finds list log in folder logs of kafka",
+          "operationId": "findListLog",
+          "produces": [
+            "application/json"
+          ],
+          "responses": {
+            "200": {
+              "description": "successful operation",
+              "schema": {
+                  "$ref": "#/definitions/ListFolder"
+              }
+            },
+            "404": {
+              "description": "Folder does not exist"
+            }
+          }
+        }
+      },
+      "/download": {
+        "get": {
+          "summary": "Download log file",
+          "description": "Download log file from folder logs of kafka",
+          "operationId": "downloadLog",
+          "produces": [
+            "application/json"
+          ],
+          "parameters": [
+            {
+              "name": "file",
+              "in": "query",
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "404": {
+              "description": "File does not exist"
+            }
+          }
+        }
+      },
+      "/zookeeperStatus": {
+        "get": {
+          "summary": "Get Zookeeper Status",
+          "description": "Check status zookeeer",
+          "operationId": "zookeeperstatus",
+          "produces": [
+            "application/json"
+          ],
+          "responses": {
+            "200": {
+                "description": "successful operation",
+                "schema": {
+                    "$ref": "#/definitions/DebeziumStatus"
+                }
+              },
+            "404": {
+              "description": "File does not exist"
+            }
+          }
+        }
+      },
+      "/kafkaStatus": {
+        "get": {
+          "summary": "Get Kafka Status",
+          "description": "Check status Kafka",
+          "operationId": "kafkalogstatus",
+          "produces": [
+            "application/json"
+          ],
+          "responses": {
+            "200": {
+                "description": "successful operation",
+                "schema": {
+                    "$ref": "#/definitions/DebeziumStatus"
+                }
+              },
+            "404": {
+              "description": "File does not exist"
+            }
+          }
+        }
+      },
+      "/kafkaConnectStatus": {
+        "get": {
+          "summary": "Get Kafka Connect Status",
+          "description": "Check status Kafka Connect",
+          "operationId": "kafkaconnectstatus",
+          "produces": [
+            "application/json"
+          ],
+          "responses": {
+            "200": {
+                "description": "successful operation",
+                "schema": {
+                    "$ref": "#/definitions/DebeziumStatus"
+                }
+              },
+            "404": {
+              "description": "File does not exist"
+            }
+          }
+        }
+      },
+      "/getAllTopic": {
+        "get": {
+          "summary": "Get all toipc of Kakfa",
+          "description": "GEt all currennt running topic",
+          "operationId": "getAllTopic",
+          "produces": [
+            "application/json"
+          ],
+          "responses": {
+            "200": {
+              "description": "successful operation",
+              "schema": {
+                  "$ref": "#/definitions/ListTopic"
+              }
+            },
+            "404": {
+              "description": "Folder does not exist"
+            }
+          }
+        }
+      }
+    },
+    "definitions": {
+      "ListFolder": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "data": {
+            "type": "array",
+            "items":{
+                "type": "string"
+            }
+          }
+        }
+      },
+      "DebeziumStatus": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "ip_port": {
+            "type": "string"
+          }, 
+          "status": {
+            "type": "string"
+          },
+          "error_msg": {
+            "type": "string"
+          }
+        }
+      },
+      "ListTopic": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "topics": {
+            "type": "string"
+          }
+        }
+      },
+      "ApiResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "object",
+            "properties": {
+
+            }
+          }
+        }
+      }
+    }
+  }

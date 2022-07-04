@@ -2,35 +2,35 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: mysql-service-target
-  name: mysql-service-target
+    app: mysqllatest-service-open
+  name: mysqllatest-service
 spec:
   ports:
   - port: 3306
     targetPort: 3306
-    name: mysql-port
+    name: mysqllatest-port
   selector:
-    app: mysql-target
+    app: mysqllatest
   type: LoadBalancer
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mysql-target
+  name: mysqllatest
 spec:
   selector:
     matchLabels:
-      app: mysql-target
+      app: mysqllatest
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: mysql-target
+        app: mysqllatest
     spec:
       containers:
-      - image: mysql:5.6
-        name: mysql-target
+      - image: mysql:latest
+        name: mysqllatest
         env:
         - name: MYSQL_ROOT_PASSWORD
           value: ZGViZXppdW1zb3VyY2U=
@@ -40,4 +40,4 @@ spec:
           value: ZGViZXppdW1zb3VyY2U=
         ports:
         - containerPort: 3306
-          name: mysql
+          name: mysqllatest
